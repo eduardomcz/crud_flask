@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5005:5000"  # Alterar a porta externa para 5001
+    env_file:
+      - .env.docker
+    environment:
+      - FLASK_ENV=development
+    depends_on:
+      - db_new
+
+  db_new:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DB}
+      MYSQL_ROOT_HOST: '%'
+    ports:
+      - "3307:3306"  # Mapear a porta 3307 externa para a porta 3306 interna do MySQL
+    volumes:
+      - ./sql/script_db_tabelas.sql:/docker-entrypoint-initdb.d/script_db_tabelas.sql
+
+volumes:
+  meu_volume_mysql:

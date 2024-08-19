@@ -2,6 +2,12 @@ from flask import Flask, render_template, request, make_response, redirect
 import pymysql
 import logging
 import re
+import os
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 # Configuração do logger para registrar mensagens de erro e informações
 logging.basicConfig(level=logging.INFO)
@@ -12,10 +18,29 @@ app.secret_key = "hkjh4k2j34jgj234lgbvjkjg243"
 
 # Função para obter uma conexão com o banco de dados
 def get_db_connection():
-    return pymysql.connect(
-        host="localhost", user="root", 
-        password="429028My", database="exemplo_db"
-    )
+    # try catch da conexão
+    try:
+        # Conecta-se ao banco de dados
+        return pymysql.connect(
+            host=os.getenv("MYSQL_HOST"),
+            user=os.getenv("MYSQL_USER"),
+            password=os.getenv("MYSQL_PASSWORD"),
+            database=os.getenv("MYSQL_DB"),
+        )
+        logging.info("Conexão com o banco de dados estabelecida com sucesso.")
+    except pymysql.MySQLError as err:
+        logging.error(f"Erro ao conectar ao banco de dados: {err}")
+        return None
+
+
+# Exemplo de rota para testar a conexão com o banco de dados
+@app.route("/test_db")
+def test_db():
+    connection = get_db_connection()
+    if connection:
+        return "Conexão com o banco de dados bem-sucedida!"
+    else:
+        return "Falha na conexão com o banco de dados."
 
 
 # Função para executar consultas que retornam resultados (SELECT)
@@ -81,17 +106,26 @@ def atualizar():
     cpf = request.form["cpf"]
     # Remover a máscara do CPF
     cpf = re.sub(r"\D", "", cpf)
-    
+
     # Validação do CPF
     if len(cpf) != 11:
         return "CPF deve ter 11 dígitos", 400
 
     # Verifique se os valores estão sendo capturados corretamente
     print(f"Nome: {nome}, Email: {email}, CPF: {cpf}")
-    
+
     sql = "UPDATE clientes SET nome = %s, email = %s, cpf = %s WHERE id = %s"
     execute_non_query(sql, (nome, email, cpf, cliente_id))
     return redirect("/")
+
+
+"""
+Esta função lida com a requisição GET para a rota '/atualizar'.
+Ela recupera o ID do cliente dos argumentos da requisição, executa uma
+consulta SQL para buscar os dados do cliente,
+e retorna uma template renderizada com os dados do cliente se encontrado,
+ou uma mensagem 'Cliente não encontrado' caso contrário.
+"""
 
 
 @app.route("/cadastrar", methods=["POST"])
@@ -101,7 +135,7 @@ def cadastrar():
     cpf = request.form["cpf"]
     # Remover a máscara do CPF
     cpf = re.sub(r"\D", "", cpf)
-    
+
     # Validação do CPF
     if len(cpf) != 11:
         return "CPF deve ter 11 dígitos", 400
@@ -113,6 +147,15 @@ def cadastrar():
     print(sql, (nome, email, cpf))
     execute_non_query(sql, (nome, email, cpf))
     return redirect("/")
+
+
+"""
+Esta função lida com requisições GET e POST para a rota '/'.
+Ela verifica se o usuário tem um cookie 'usuario' e, se não tiver, cria um.
+Em seguida, executa uma consulta SQL para buscar todos os clientes e retorna
+uma template renderizada com os dados dos clientes.
+Caso a requisição seja POST, ela retorna o nome do usuário do formulário.
+"""
 
 
 # Rota principal que exibe a lista de clientes
@@ -135,7 +178,12 @@ def index():
             {"id": x[0], "nome": x[1], "email": x[2], "cpf": x[3]} for x in tb_clientes
         ]
 
-        return render_template("index.html", content=tb_clientes)
+        try:
+            logging.info("Rota principal acessada.")
+            return render_template("index.html", content=tb_clientes)
+        except Exception as e:
+            logging.error(f"Erro na rota principal: {e}")
+            return "Erro ao carregar a página principal", 500
     else:
         return "O que veio do meu form: " + request.form["nome"]
 
