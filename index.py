@@ -2,15 +2,12 @@ from flask import Flask, render_template, request, make_response, redirect
 import pymysql
 import logging
 import re
-<<<<<<< HEAD
 import os
 
 from dotenv import load_dotenv
 
 load_dotenv()
 
-=======
->>>>>>> 6d9d48f972b487cc46f3c4366fc9cae85605fda6
 
 # Configuração do logger para registrar mensagens de erro e informações
 logging.basicConfig(level=logging.INFO)
@@ -21,7 +18,6 @@ app.secret_key = "hkjh4k2j34jgj234lgbvjkjg243"
 
 # Função para obter uma conexão com o banco de dados
 def get_db_connection():
-<<<<<<< HEAD
     # try catch da conexão
     try:
         # Conecta-se ao banco de dados
@@ -45,12 +41,6 @@ def test_db():
         return "Conexão com o banco de dados bem-sucedida!"
     else:
         return "Falha na conexão com o banco de dados."
-=======
-    return pymysql.connect(
-        host="localhost", user="root", 
-        password="429028My", database="exemplo_db"
-    )
->>>>>>> 6d9d48f972b487cc46f3c4366fc9cae85605fda6
 
 
 # Função para executar consultas que retornam resultados (SELECT)
@@ -116,28 +106,17 @@ def atualizar():
     cpf = request.form["cpf"]
     # Remover a máscara do CPF
     cpf = re.sub(r"\D", "", cpf)
-<<<<<<< HEAD
-
-=======
-    
->>>>>>> 6d9d48f972b487cc46f3c4366fc9cae85605fda6
     # Validação do CPF
     if len(cpf) != 11:
         return "CPF deve ter 11 dígitos", 400
 
     # Verifique se os valores estão sendo capturados corretamente
     print(f"Nome: {nome}, Email: {email}, CPF: {cpf}")
-<<<<<<< HEAD
-
-=======
-    
->>>>>>> 6d9d48f972b487cc46f3c4366fc9cae85605fda6
     sql = "UPDATE clientes SET nome = %s, email = %s, cpf = %s WHERE id = %s"
     execute_non_query(sql, (nome, email, cpf, cliente_id))
     return redirect("/")
 
 
-<<<<<<< HEAD
 """
 Esta função lida com a requisição GET para a rota '/atualizar'.
 Ela recupera o ID do cliente dos argumentos da requisição, executa uma
@@ -147,8 +126,6 @@ ou uma mensagem 'Cliente não encontrado' caso contrário.
 """
 
 
-=======
->>>>>>> 6d9d48f972b487cc46f3c4366fc9cae85605fda6
 @app.route("/cadastrar", methods=["POST"])
 def cadastrar():
     nome = request.form["nome"]
@@ -156,11 +133,6 @@ def cadastrar():
     cpf = request.form["cpf"]
     # Remover a máscara do CPF
     cpf = re.sub(r"\D", "", cpf)
-<<<<<<< HEAD
-
-=======
-    
->>>>>>> 6d9d48f972b487cc46f3c4366fc9cae85605fda6
     # Validação do CPF
     if len(cpf) != 11:
         return "CPF deve ter 11 dígitos", 400
@@ -174,7 +146,6 @@ def cadastrar():
     return redirect("/")
 
 
-<<<<<<< HEAD
 """
 Esta função lida com requisições GET e POST para a rota '/'.
 Ela verifica se o usuário tem um cookie 'usuario' e, se não tiver, cria um.
@@ -184,8 +155,6 @@ Caso a requisição seja POST, ela retorna o nome do usuário do formulário.
 """
 
 
-=======
->>>>>>> 6d9d48f972b487cc46f3c4366fc9cae85605fda6
 # Rota principal que exibe a lista de clientes
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -206,16 +175,12 @@ def index():
             {"id": x[0], "nome": x[1], "email": x[2], "cpf": x[3]} for x in tb_clientes
         ]
 
-<<<<<<< HEAD
         try:
             logging.info("Rota principal acessada.")
             return render_template("index.html", content=tb_clientes)
         except Exception as e:
             logging.error(f"Erro na rota principal: {e}")
             return "Erro ao carregar a página principal", 500
-=======
-        return render_template("index.html", content=tb_clientes)
->>>>>>> 6d9d48f972b487cc46f3c4366fc9cae85605fda6
     else:
         return "O que veio do meu form: " + request.form["nome"]
 
